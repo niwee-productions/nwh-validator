@@ -1,6 +1,6 @@
 {
   "name": "nwhval",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Frontend validation done right.",
   "main": "src/nwhval.js",
   "scripts": {
