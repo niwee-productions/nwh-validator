@@ -1,11 +1,11 @@
 {
   "name": "nwhval",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Frontend validation done right.",
   "main": "dist/nwhval.min.js",
   "scripts": {
-    "dev": "NODE_ENV=development webpack --mode=development --config ./webpack.dev.js --watch",
-    "build": "NODE_ENV=production webpack --mode=production --config ./webpack.prod.js"
+    "dev": "webpack --config ./webpack.dev.js --watch",
+    "build": "webpack --config ./webpack.prod.js"
   },
   "repository": {
     "type": "git",
