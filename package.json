@@ -1,6 +1,6 @@
 {
   "name": "nwhval",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Frontend validation done right.",
   "main": "dist/nwhval.min.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/niwee-productions/nwhval.git"
+    "url": "git+https://github.com/niwee-productions/nwh-validator.git"
   },
   "keywords": [
     "vanilla",
@@ -20,9 +20,9 @@
   "author": "Nicolas Boyer",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/niwee-productions/nwhval/issues"
+    "url": "https://github.com/niwee-productions/nwh-validator/issues"
   },
-  "homepage": "https://github.com/niwee-productions/nwhval#readme",
+  "homepage": "https://github.com/niwee-productions/nwh-validator#readme",
   "devDependencies": {
     "@babel/core": "^7.18.13",
     "@babel/eslint-parser": "^7.18.9",
