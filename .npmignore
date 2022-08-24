@@ -10,3 +10,4 @@ node_modules/
 .git
 postcss.config.js
 src/
+rollup.config.js
