@@ -1,45 +1,121 @@
 import { lang } from './_lang';
-import { tmpl, findAncestor, groupedElemCount, mergeConfig, isFunction } from './_utils';
-
-let defaultConfig = {
-    classTo: 'form-group',
-    errorClass: 'has-danger',
-    successClass: 'has-success',
-    errorTextParent: 'form-group',
-    errorTextTag: 'div',
-    errorTextClass: 'text-help',
-    lang: 'en'
-}
-
-const NWHVAL_ERROR = 'nwhval-error';
-const SELECTOR = "input:not([type^=hidden]):not([type^=submit]), select, textarea";
-const ALLOWED_ATTRIBUTES = ["required", "min", "max", 'minlength', 'maxlength', 'pattern'];
-const EMAIL_REGEX = /^[a-zA-Z0-9.! #$%&'*+/=? ^_`{|}~-]+@[a-zA-Z0-9-]+(?:\. [a-zA-Z0-9-]+)*$/;
+import { tmpl, findAncestor, groupedElemCount, mergeConfig, isFunction, insertAfter } from './_utils';
 
 class Validator
 {
-    constructor(form, config, live)
+    constructor(form, config)
     {
-        this.config = mergeConfig(config || {}, defaultConfig);
+        this.defaultConfig = {
+            classTo: 'form-group',
+            errorClass: 'is-invalid',
+            successClass: 'is-valid',
+            errorTextParent: 'form-group',
+            errorTextTag: 'div',
+            live: true,
+            errorTextClass: 'invalid-feedback',
+            lang: 'en'
+        }
+
+        this.form = form;
+        this.config = mergeConfig(config || {}, this.defaultConfig);
+
+        this.NWHVAL_ERROR = 'nwhval-error';
+        const SELECTOR = "input:not([type^=hidden]):not([type^=submit]), select, textarea";
+        const ALLOWED_ATTRIBUTES = ["required", "min", "max", 'minlength', 'maxlength', 'pattern'];
+        const EMAIL_REGEX = /^[a-zA-Z0-9.! #$%&'*+/=? ^_`{|}~-]+@[a-zA-Z0-9-]+(?:\. [a-zA-Z0-9-]+)*$/;
+        const MESSAGE_REGEX = /-message(?:-([a-z]{2}(?:_[A-Z]{2})?))?/; // matches, -message, -message-en, -message-en_US
         this.validators = {};
 
-        this._setValidator('text', { fn: () => true, priority: 0 }, this.config.lang);
-        this._setValidator('required', { fn: function (val) { return (this.type === 'radio' || this.type === 'checkbox') ? groupedElemCount(this) : val !== undefined && val !== '' }, priority: 99, halt: true }, this.config.lang);
-        this._setValidator('email', { fn: (val) => !val || EMAIL_REGEX.test(val) }, this.config.lang);
-        this._setValidator('number', { fn: (val) => !val || !isNaN(parseFloat(val)), priority: 2 }, this.config.lang);
-        this._setValidator('integer', { fn: (val) => !val || /^\d+$/.test(val) }, this.config.lang);
-        this._setValidator('minlength', { fn: (val, length) => !val || val.length >= parseInt(length) }, this.config.lang);
-        this._setValidator('maxlength', { fn: (val, length) => !val || val.length <= parseInt(length) }, this.config.lang);
-        this._setValidator('min', { fn: function (val, limit) { return !val || (this.type === 'checkbox' ? groupedElemCount(this) >= parseInt(limit) : parseFloat(val) >= parseFloat(limit)); } }, this.config.lang);
-        this._setValidator('max', { fn: function (val, limit) { return !val || (this.type === 'checkbox' ? groupedElemCount(this) <= parseInt(limit) : parseFloat(val) <= parseFloat(limit)); } }, this.config.lang);
-        this._setValidator('pattern', { fn: (val, pattern) => { let m = pattern.match(new RegExp('^/(.*?)/([gimy]*)$')); return !val || (new RegExp(m[1], m[2])).test(val); } }, this.config.lang);
+        this._setValidator(
+            'text',
+            {
+                fn: () => true, priority: 0
+            },
+            this.config.lang
+        );
+
+        this._setValidator(
+            'required',
+            {
+                fn: function (val)
+                {
+                    return (this.type === 'radio' || this.type === 'checkbox') ? groupedElemCount(this) : val !== undefined && val !== ''
+                }, priority: 99, halt: true
+            },
+            this.config.lang
+        );
+
+        this._setValidator(
+            'email',
+            {
+                fn: (val) => !val || EMAIL_REGEX.test(val)
+            },
+            this.config.lang
+        );
+
+        this._setValidator(
+            'number',
+            {
+                fn: (val) => !val || !isNaN(parseFloat(val)), priority: 2
+            },
+            this.config.lang
+        );
+
+        this._setValidator(
+            'integer',
+            {
+                fn: (val) => !val || /^\d+$/.test(val)
+            },
+            this.config.lang
+        );
+
+        this._setValidator(
+            'minlength',
+            {
+                fn: (val, length) => !val || val.length >= parseInt(length)
+            },
+            this.config.lang
+        );
+
+        this._setValidator(
+            'maxlength',
+            {
+                fn: (val, length) => !val || val.length <= parseInt(length)
+            },
+            this.config.lang
+        );
+
+        this._setValidator(
+            'min',
+            {
+                fn: function (val, limit) { return !val || (this.type === 'checkbox' ? groupedElemCount(this) >= parseInt(limit) : parseFloat(val) >= parseFloat(limit)); }
+            },
+            this.config.lang
+        );
+
+        this._setValidator(
+            'max',
+            {
+                fn: function (val, limit) { return !val || (this.type === 'checkbox' ? groupedElemCount(this) <= parseInt(limit) : parseFloat(val) <= parseFloat(limit)); }
+            },
+            this.config.lang
+        );
+
+        this._setValidator(
+            'pattern',
+            {
+                fn: (val, pattern) => { let m = pattern.match(new RegExp('^/(.*?)/([gimy]*)$')); return !val || (new RegExp(m[1], m[2])).test(val); }
+            },
+            this.config.lang
+        );
+
 
         form.setAttribute("novalidate", "true");
 
-        this.form = form;
+        let self = this;
+        const inputs = form.querySelectorAll(SELECTOR);
 
-        this.live = !(live === false);
-        this.fields = Array.from(form.querySelectorAll(SELECTOR)).map(function (input)
+        this.fields = Array.from(inputs).map(function (input)
         {
             let fns = [];
             let params = {};
@@ -47,49 +123,74 @@ class Validator
 
             [].forEach.call(input.attributes, function (attr)
             {
-                if (/^data-nwhval-/.test(attr.name))
+                if (/^data-pristine-/.test(attr.name))
                 {
                     let name = attr.name.substr(14);
-                    if (name.endsWith('-message'))
+                    let messageMatch = name.match(MESSAGE_REGEX);
+                    if (messageMatch !== null)
                     {
-                        messages[name.slice(0, name.length - 8)] = attr.value;
+                        let locale = messageMatch[1] === undefined ? 'en' : messageMatch[1];
+                        if (!messages.hasOwnProperty.call(locale))
+                            messages[locale] = {};
+                        messages[locale][name.slice(0, name.length - messageMatch[0].length)] = attr.value;
                         return;
                     }
-
                     if (name === 'type') name = attr.value;
-                    this._addValidatorToField(fns, params, name, attr.value);
-                }
-                else if (~ALLOWED_ATTRIBUTES.indexOf(attr.name))
+                    self._addValidatorToField(fns, params, name, attr.value);
+                } else if (~ALLOWED_ATTRIBUTES.indexOf(attr.name))
                 {
-                    this._addValidatorToField(fns, params, attr.name, attr.value);
-                }
-                else if (attr.name === 'type')
+                    self._addValidatorToField(fns, params, attr.name, attr.value);
+                } else if (attr.name === 'type')
                 {
-                    this._addValidatorToField(fns, params, attr.value);
+                    self._addValidatorToField(fns, params, attr.value);
                 }
             });
 
             fns.sort((a, b) => b.priority - a.priority);
 
-            this.live && input.addEventListener((!~['radio', 'checkbox'].indexOf(input.getAttribute('type')) ? 'input' : 'change'), function (e)
-            {
-                this.validate(e.target);
-            }.bind(self));
-
-            return input.nwhval = { input, validators: fns, params, messages, self };
+            return input.pristine = { input, validators: fns, params, messages, self };
 
         }.bind(self));
+
+        for (let i = 0; i < inputs.length; i++)
+        {
+            if (inputs[i].getAttribute('type') === 'radio' || inputs[i].getAttribute('type') === 'checkbox')
+            {
+                inputs[i].addEventListener('change', function (e)
+                {
+                    self.validate(e.target);
+                });
+            }
+            else
+            {
+                inputs[i].addEventListener('input', function (e)
+                {
+                    self.validate(e.target);
+                });
+            }
+        }
+
+        // self.config.live && input.addEventListener((!~['radio', 'checkbox'].indexOf(input.getAttribute('type')) ? 'input' : 'change'), function (e)
+        // {
+        //     console.log(e.target);
+        //     self.validate(e.target);
+        // }.bind(self));
     }
-
-
 
     _setValidator(name, validator, locale)
     {
         validator.name = name;
+
         if (!validator.msg)
+        {
             validator.msg = lang[locale][name];
+        }
+
         if (validator.priority === undefined)
+        {
             validator.priority = 1;
+        }
+
         this.validators[name] = validator;
     }
 
@@ -117,36 +218,62 @@ class Validator
      */
     validate(input, silent)
     {
-        silent = (input && silent === true) || input === true;
-        let fields = this.fields;
-        if (input !== true && input !== false)
+        if (input === undefined)
         {
-            if (input instanceof HTMLElement)
+            silent = (input && silent === true) || input === true;
+
+            let fields = this.fields;
+
+            if (input !== true && input !== false)
             {
-                fields = [input.nwhval];
+                if (input instanceof HTMLElement)
+                {
+                    fields = [input.pristine];
+                } else if (input instanceof NodeList || input instanceof (window.$ || Array) || input instanceof Array)
+                {
+                    fields = Array.from(input).map(el => el.pristine);
+                }
             }
-            else if (input instanceof NodeList || input instanceof (window.$ || Array) || input instanceof Array)
+
+            let valid = true;
+
+            for (let i = 0; fields[i]; i++)
             {
-                fields = Array.from(input).map(el => el.nwhval);
+                let field = fields[i];
+                if (this._validateField(field))
+                {
+                    !silent && this._showSuccess(field);
+                } else
+                {
+                    valid = false;
+                    !silent && this._showError(field);
+                }
             }
+            return valid;
         }
-
-        let valid = true;
-
-        for (let i = 0; fields[i]; i++)
+        else if (
+            input.nodeName === "INPUT"
+            ||
+            input.nodeName === "SELECT"
+            ||
+            input.nodeName === "TEXTAREA"
+        )
         {
-            let field = fields[i];
-            if (this._validateField(field))
+            let toValidate = this.fields.find(field => field.input === input);
+            if (this._validateField(toValidate))
             {
-                !silent && this._showSuccess(field);
+                !silent && this._showSuccess(toValidate);
             }
             else
             {
-                valid = false;
-                !silent && this._showError(field);
+                !silent && this._showError(toValidate);
             }
         }
-        return valid;
+
+        // console.log("Validating: " + input.getAttribute("name") + " silent: " + silent);
+
+
+
     }
 
     /***
@@ -187,11 +314,13 @@ class Validator
     {
         let errors = [];
         let valid = true;
+
         for (let i = 0; field.validators[i]; i++)
         {
             let validator = field.validators[i];
             let params = field.params[validator.name] ? field.params[validator.name] : [];
             params[0] = field.input.value;
+
             if (!validator.fn.apply(field.input, params))
             {
                 valid = false;
@@ -212,6 +341,7 @@ class Validator
                 }
             }
         }
+
         field.errors = errors;
         return valid;
     }
@@ -241,12 +371,12 @@ class Validator
         }
         if (errorTextParent)
         {
-            errorTextElement = errorTextParent.querySelector('.' + NWHVAL_ERROR);
+            errorTextElement = errorTextParent.querySelector('.' + this.NWHVAL_ERROR);
             if (!errorTextElement)
             {
                 errorTextElement = document.createElement(this.config.errorTextTag);
-                errorTextElement.className = NWHVAL_ERROR + ' ' + this.config.errorTextClass;
-                errorTextParent.appendChild(errorTextElement);
+                errorTextElement.className = this.NWHVAL_ERROR + ' ' + this.config.errorTextClass;
+                insertAfter(errorTextElement, field.input);
                 errorTextElement.nwhvalDisplay = errorTextElement.style.display;
             }
         }
@@ -284,7 +414,6 @@ class Validator
     {
         input = input.length ? input[0] : input;
         input.nwhval.errors.push(error);
-        console.log(input);
         this._showError(input.nwhval);
     }
 
@@ -333,7 +462,7 @@ class Validator
         {
             this.fields[i].errorElements = null;
         }
-        Array.from(this.form.querySelectorAll('.' + NWHVAL_ERROR)).map(function (elem)
+        Array.from(this.form.querySelectorAll('.' + this.NWHVAL_ERROR)).map(function (elem)
         {
             elem.parentNode.removeChild(elem);
         });
@@ -360,22 +489,22 @@ class Validator
 
     setGlobalConfig(config)
     {
-        defaultConfig = config;
+        this.defaultConfig = config;
     }
 
-    /***
-     *
-     * @param name => Name of the global validator
-     * @param fn => validator function
-     * @param msg => message to show when validation fails. Supports templating. ${0} for the input's value, ${1} and
-     * so on are for the attribute values
-     * @param priority => priority of the validator function, higher valued function gets called first.
-     * @param halt => whether validation should stop for this field after current validation function
-     */
-    addValidator(name, fn, msg, priority, halt)
-    {
-        this._setValidator(name, { fn, msg, priority, halt });
-    }
+    // /***
+    //  *
+    //  * @param name => Name of the global validator
+    //  * @param fn => validator function
+    //  * @param msg => message to show when validation fails. Supports templating. ${0} for the input's value, ${1} and
+    //  * so on are for the attribute values
+    //  * @param priority => priority of the validator function, higher valued function gets called first.
+    //  * @param halt => whether validation should stop for this field after current validation function
+    //  */
+    // addValidator(name, fn, msg, priority, halt)
+    // {
+    //     this._setValidator(name, { fn, msg, priority, halt });
+    // }
 
     /***
     *
@@ -386,7 +515,7 @@ class Validator
     * @param priority => priority of the validator function, higher valued function gets called first.
     * @param halt => whether validation should stop for this field after current validation function
     */
-    addDomValidator(elem, fn, msg, priority, halt)
+    addValidator(elem, fn, msg, priority, halt)
     {
         if (elem instanceof HTMLElement)
         {
@@ -395,7 +524,7 @@ class Validator
         }
         else
         {
-            console.warn("The parameter elem must be a dom element");
+            this._setValidator(name, { fn, msg, priority, halt });
         }
     }
 }

@@ -1,6 +1,12 @@
 .idea/*
 package-lock.json
 node_modules
-_site
-Gemfile.lock
-_config.yml
+webpack.*
+yarn*
+.babel*
+node_modules/
+.eslintrc.js
+.gitignore
+.git
+postcss.config.js
+dist/

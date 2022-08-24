@@ -1,7 +1,6 @@
-export function findAncestor(el, cls)
+export function findAncestor(el)
 {
-    while ((el = el.parentElement) && !el.classList.contains(cls));
-    return el;
+    return el.parentNode;
 }
 
 export function tmpl()
@@ -29,4 +28,10 @@ export function mergeConfig(obj1, obj2)
 export function isFunction(obj)
 {
     return !!(obj && obj.constructor && obj.call && obj.apply);
+}
+
+
+export function insertAfter(newNode, referenceNode)
+{
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
