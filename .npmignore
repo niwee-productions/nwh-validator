@@ -11,3 +11,4 @@ node_modules/
 postcss.config.js
 src/
 rollup.config.js
+dist/nwhval.js
