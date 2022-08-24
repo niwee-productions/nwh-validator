@@ -9,4 +9,4 @@ node_modules/
 .gitignore
 .git
 postcss.config.js
-dist/
+src/

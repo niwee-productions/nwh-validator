@@ -37,16 +37,17 @@ form.addEventListener("submit", (e) => {
 
 You can pass parameters to the validator constructor to configure it.
 
-| Parameter       | Description                                              | Default value    |
-| --------------- | -------------------------------------------------------- | ---------------- |
-| classTo         | Class to add to the form-group                           | form-group       |
-| errorClass      | Class to add to the form-group when the field is invalid | is-invalid       |
-| successClass    | Class to add to the form-group when the field is valid   | is-valid         |
-| errorTextParent | Parent element to add the error text                     | form-group       |
-| errorTextTag    | Tag to use to add the error text                         | div              |
-| errorTextClass  | Class to add to the error text                           | invalid-feedback |
-| live            | Whether to validate the form on keyup or on submit       | true             |
-| lang            | Language to use for the error messages                   | en               |
+| Parameter         | Description                                              | Default value      | Available Options           |
+| ----------------- | -------------------------------------------------------- | ------------------ | --------------------------- |
+| `styling `        | Wether to use Bootstrap 4 or 5 styling                   | `bootstrap-5`      | `boostrap-4`, `bootstrap-5` |
+| `classTo`         | Class to add to the form-group                           | `form-group`       |                             |
+| `errorClass`      | Class to add to the form-group when the field is invalid | `is-invalid `      |                             |
+| `successClass`    | Class to add to the form-group when the field is valid   | `is-valid `        |                             |
+| `errorTextParent` | Parent element to add the error text                     | `form-group `      |                             |
+| `errorTextTag`    | Tag to use to add the error text                         | `div`              |                             |
+| `errorTextClass`  | Class to add to the error text                           | `invalid-feedback` |                             |
+| `live`            | Whether to validate the form on keyup or on submit       | `true`             |                             |
+| `lang`            | Language to use for the error messages                   | `en`               | `fr`, `es`, `en`            |
 
 ### A note on the `lang` parameter
 

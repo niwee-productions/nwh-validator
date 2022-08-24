@@ -5,15 +5,33 @@ class Validator
 {
     constructor(form, config)
     {
-        this.defaultConfig = {
-            classTo: 'form-group',
-            errorClass: 'is-invalid',
-            successClass: 'is-valid',
-            errorTextParent: 'form-group',
-            errorTextTag: 'div',
-            live: true,
-            errorTextClass: 'invalid-feedback',
-            lang: 'en'
+        if (config.styling === undefined)
+        {
+            this.defaultConfig = {
+                styling: "bootstrap-5",
+                classTo: 'form-group',
+                errorClass: 'is-invalid',
+                successClass: 'is-valid',
+                errorTextParent: 'form-group',
+                errorTextClass: 'invalid-feedback',
+                errorTextTag: 'div',
+                live: true,
+                lang: 'en'
+            }
+        }
+        else if (config.styling === "bootstrap-4")
+        {
+            this.defaultConfig = {
+                styling: "bootstrap-4",
+                classTo: 'form-group',
+                errorClass: 'has-danger',
+                successClass: 'has-success',
+                errorTextParent: 'form-group',
+                errorTextClass: 'text-help',
+                errorTextTag: 'div',
+                live: true,
+                lang: 'en'
+            }
         }
 
         this.form = form;
