@@ -4,8 +4,8 @@
   "description": "Frontend validation done right.",
   "main": "dist/nwhval.min.js",
   "scripts": {
-    "dev": "webpack --config ./webpack.dev.js --watch",
-    "build": "rollup --config ./rollup.config.js"
+    "dev": "NODE_ENV='development' rollup --config ./rollup.config.js --watch",
+    "build": "NODE_ENV='production' rollup --config ./rollup.config.js"
   },
   "repository": {
     "type": "git",

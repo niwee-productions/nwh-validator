@@ -7,7 +7,7 @@ import { uglify } from "rollup-plugin-uglify";
 export default {
     input: 'src/nwhval.js',
     output: {
-        file: 'dist/nwhval.min.js',
+        file: process.env.NODE_ENV === 'production' && 'dist/nwhval.min.js' || 'dist/nwhval.js',
         format: 'es',
         name: 'nwhval'
     },
@@ -22,6 +22,6 @@ export default {
         replace({
             ENV: JSON.stringify(process.env.NODE_ENV || 'development'),
         }),
-        uglify(),
+        process.env.NODE_ENV === 'production' && uglify(),
     ],
 }
