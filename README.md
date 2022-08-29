@@ -52,3 +52,32 @@ You can pass parameters to the validator constructor to configure it.
 ### A note on the `lang` parameter
 
 Currently, only English, French and Spanish are supported. Feel free to add your own language and open a merge request !
+
+### Config Usage
+
+```js
+import Validator from "nwhval";
+
+const validatorConfig = {
+  styling: "bootstrap-5",
+  classTo: "form-group",
+  errorClass: "is-invalid",
+  successClass: "is-valid",
+  errorTextParent: "form-group",
+  errorTextClass: "invalid-feedback",
+  errorTextTag: "div",
+  live: true,
+  lang: "en",
+};
+
+const form = document.querySelector("#my-form");
+const validator = new Validator(form, validatorConfig);
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  if (validator.validate()) {
+    // form is valid, get ready for backend validation !
+  }
+});
+```
